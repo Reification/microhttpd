@@ -7,7 +7,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE STRING "" FORCE)
 
 #if we have the default install prefix (which we will never use) set to a reasonable test location
-if("${CMAKE_INSTALL_PREFIX}" STREQUAL "C:/Program Files/microhttpd")
+if("${CMAKE_INSTALL_PREFIX}" MATCHES "/Program Files")
   set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE STRING "" FORCE)
 endif()
 
@@ -16,23 +16,28 @@ set(BUILD_TESTS_AS_LIBS FALSE)
 
 set(LIB_SRC_DIR "src/microhttpd")
 set(API_HDR_DIR "src/include")
-set(API_GEN_HDR_DIR "${CMAKE_BINARY_DIR}/include")
 
 set(LINK_LIBS)
 
 if(WIN32)
-  configure_file("w32/common/MHD_config.h" "${API_GEN_HDR_DIR}/MHD_config.h" COPYONLY)
-  set(LINK_LIBS "ws2_32.lib")
+  set(API_PLAT_HDR_DIR "w32/common")
   string(REGEX REPLACE "/W[0-4]" "/W0" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
   add_definitions(-DMHD_W32LIB -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
 elseif(ANDROID)
+  set(API_PLAT_HDR_DIR "android")
+
+  #set(LINK_LIBS "libsocket.a")
   set(BUILD_TESTS_AS_LIBS TRUE)
-  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} NYI")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-tautological-constant-out-of-range-compare")
 elseif(APPLE)
+  set(API_PLAT_HDR_DIR ${CMAKE_BINARY_DIR}/generated)
+  #on osx we probably have access to autotools and can configure more conventionally
   message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} NYI")
 else()
   message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} NYI")
 endif()
+
+set(API_CONFIG_HDR ${API_PLAT_HDR_DIR}/MHD_config.h)
 
 file(GLOB LIB_SRC "${LIB_SRC_DIR}/*.c")
 file(GLOB LIB_HDR "${LIB_SRC_DIR}/*.h")
@@ -42,12 +47,12 @@ list(FILTER LIB_SRC EXCLUDE REGEX "/connection_https")
 list(FILTER LIB_HDR EXCLUDE REGEX "/test_")
 list(FILTER LIB_HDR EXCLUDE REGEX "/connection_https")
 
-file(GLOB API_HDR "${API_HDR_DIR}/*.h" "${API_GEN_HDR_DIR}/*.h")
+file(GLOB API_HDR "${API_HDR_DIR}/*.h" ${API_CONFIG_HDR})
 
 include_directories(
  ${PROJECT_NAME}
  ${API_HDR_DIR}
- ${API_GEN_HDR_DIR}
+ ${API_PLAT_HDR_DIR}
  ${LIB_SRC_DIR}
 )
 
