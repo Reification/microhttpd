@@ -4,7 +4,12 @@ project(microhttpd LANGUAGES C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE LIST "" FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE STRING "" FORCE)
+
+#if we have the default install prefix (which we will never use) set to a reasonable test location
+if("${CMAKE_INSTALL_PREFIX}" STREQUAL "C:/Program Files/microhttpd")
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE STRING "" FORCE)
+endif()
 
 set(BUILD_TESTS FALSE CACHE BOOL "Build simple manually run tests")
 set(BUILD_TESTS_AS_LIBS FALSE)
