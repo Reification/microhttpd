@@ -1,29 +1,68 @@
 cmake_minimum_required(VERSION 3.11)
-project(OpenCL-Loader LANGUAGES C)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+project(microhttpd LANGUAGES C)
 
-set(API_INCLUDE_DIR "src/include")
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE LIST "" FORCE)
+
+set(BUILD_TESTS FALSE CACHE BOOL "Build simple manually run tests")
+set(BUILD_TESTS_AS_LIBS FALSE)
+
 set(LIB_SRC_DIR "src/microhttpd")
+set(API_HDR_DIR "src/include")
+set(API_GEN_HDR_DIR "${CMAKE_BINARY_DIR}/include")
 
-file(GLOB API_HEADERS "${API_INCLUDE_DIR}/*.h" "${API_INCLUDE_DIR}/*.hpp")
-file(GLOB LIB_SRC "${CMAKE_BINARY_DIR}/opencl_loader/${OPENCL_VERSION}/src/*.c")
+set(LINK_LIBS)
+
+if(WIN32)
+  configure_file("w32/common/MHD_config.h" "${API_GEN_HDR_DIR}/MHD_config.h" COPYONLY)
+  set(LINK_LIBS "ws2_32.lib")
+  string(REGEX REPLACE "/W[0-4]" "/W0" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+  add_definitions(-DMHD_W32LIB -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
+elseif(ANDROID)
+  set(BUILD_TESTS_AS_LIBS TRUE)
+  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} NYI")
+elseif(APPLE)
+  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} NYI")
+else()
+  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} NYI")
+endif()
+
+file(GLOB LIB_SRC "${LIB_SRC_DIR}/*.c")
+file(GLOB LIB_HDR "${LIB_SRC_DIR}/*.h")
+
+list(FILTER LIB_SRC EXCLUDE REGEX "/test_")
+list(FILTER LIB_SRC EXCLUDE REGEX "/connection_https")
+list(FILTER LIB_HDR EXCLUDE REGEX "/test_")
+list(FILTER LIB_HDR EXCLUDE REGEX "/connection_https")
+
+file(GLOB API_HDR "${API_HDR_DIR}/*.h" "${API_GEN_HDR_DIR}/*.h")
 
 include_directories(
  ${PROJECT_NAME}
- PRIVATE
- ${API_INCLUDE_ROOT}
+ ${API_HDR_DIR}
+ ${API_GEN_HDR_DIR}
+ ${LIB_SRC_DIR}
 )
 
-add_library(${PROJECT_NAME} STATIC ${LIB_SRC} ${API_HEADERS} ${GEN_SRC})
+add_library(${PROJECT_NAME} STATIC ${LIB_SRC} ${LIB_HDR} ${API_HDR})
+set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_FLAGS "-DBUILDING_MHD_LIB")
 
-source_group("Generator" FILES ${GEN_SRC})
-source_group("${CL_SUBDIR}" FILES ${API_HEADERS})
+source_group("API" FILES ${API_HDR})
 
-if(BUILD_TEST)
-  add_executable(${PROJECT_NAME}-test EXCLUDE_FROM_ALL ${CMAKE_SOURCE_DIR}/test/test.c)
-  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+if(BUILD_TESTS)
+  set(TESTS hellobrowser simplepost largepost)
+  foreach(TEST ${TESTS})
+    if(BUILD_TESTS_AS_LIBS)
+      add_library("${TEST}" SHARED doc/examples/${TEST}.c)
+    else()
+      add_executable("${TEST}" doc/examples/${TEST}.c)
+    endif()
+    set_target_properties("${TEST}" PROPERTIES FOLDER "Tests")
+    target_link_libraries("${TEST}" ${PROJECT_NAME} ${LINK_LIBS})
+  endforeach()
 endif()
 
 install(FILES $<TARGET_FILE:${PROJECT_NAME}> DESTINATION lib)
-install(DIRECTORY ${API_INCLUDE_DIR}/ DESTINATION include/${CL_SUBDIR})
+install(FILES ${API_HDR} DESTINATION include/${PROJECT_NAME})
