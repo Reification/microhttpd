@@ -73,15 +73,6 @@
 #ifndef MICROHTTPD2_H
 #define MICROHTTPD2_H
 
-
-#ifdef __cplusplus
-extern "C"
-{
-#if 0                           /* keep Emacsens' auto-indent happy */
-}
-#endif
-#endif
-
 /* While we generally would like users to use a configure-driven
    build process which detects which headers are present and
    hence works on any platform, we use "standard" includes here
@@ -122,29 +113,6 @@ typedef intptr_t ssize_t;
  * 0x01093001 = 1.9.30-1.
  */
 #define MHD_VERSION 0x01000000
-
-
-
-/**
- * Representation of 'bool' in the public API as stdbool.h may not
- * always be available.
- */
-enum MHD_Bool
-{
-
-  /**
-   * MHD-internal return code for "NO".
-   */
-  MHD_NO = 0,
-
-  /**
-   * MHD-internal return code for "YES".  All non-zero values
-   * will be interpreted as "YES", but MHD will only ever
-   * return #MHD_YES or #MHD_NO.
-   */
-  MHD_YES = 1
-};
-
 
 /**
  * Constant used to indicate unknown size (use when
@@ -296,6 +264,33 @@ typedef SOCKET MHD_socket;
 #define MHD_UNSIGNED_LONG_LONG_PRINTF "%llu"
 #endif
 
+#ifdef __cplusplus
+extern "C"
+{
+#if 0                           /* keep Emacsens' auto-indent happy */
+}
+#endif // 0
+#endif // __cplusplus
+
+/**
+ * Representation of 'bool' in the public API as stdbool.h may not
+ * always be available.
+ */
+enum MHD_Bool
+{
+
+  /**
+   * MHD-internal return code for "NO".
+   */
+  MHD_NO = 0,
+
+  /**
+   * MHD-internal return code for "YES".  All non-zero values
+   * will be interpreted as "YES", but MHD will only ever
+   * return #MHD_YES or #MHD_NO.
+   */
+  MHD_YES = 1
+};
 
 /**
  * @brief Handle for a connection / HTTP request.
@@ -4191,5 +4186,14 @@ enum MHD_RequestEventLoopInfo
   MHD_EVENT_LOOP_INFO_CLEANUP = 3
 };
 
+
+#ifdef __cplusplus
+#if 0                           /* keep Emacsens' auto-indent happy */
+{
+#endif // 0
+}
+#endif // __cplusplus
+
+#error This API Is Not Implemented. Use microhttpd.h
 
 #endif
