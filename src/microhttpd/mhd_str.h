@@ -26,6 +26,14 @@
 #ifndef MHD_STR_H
 #define MHD_STR_H 1
 
+#ifdef __cplusplus
+extern "C"
+{
+#if 0                           /* keep Emacsens' auto-indent happy */
+}
+#endif
+#endif
+
 #include "mhd_options.h"
 
 #include <stdint.h>
@@ -262,5 +270,12 @@ MHD_str_to_uvalue_n_ (const char * str,
                                              sizeof(uint64_t),UINT64_MAX,16)
 
 #endif /* MHD_FAVOR_SMALL_CODE */
+
+#if 0                           /* keep Emacsens' auto-indent happy */
+{
+#endif
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MHD_STR_H */
