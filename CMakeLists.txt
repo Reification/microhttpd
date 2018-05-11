@@ -47,7 +47,11 @@ list(FILTER LIB_SRC EXCLUDE REGEX "/connection_https")
 list(FILTER LIB_HDR EXCLUDE REGEX "/test_")
 list(FILTER LIB_HDR EXCLUDE REGEX "/connection_https")
 
-file(GLOB API_HDR "${API_HDR_DIR}/*.h" ${API_CONFIG_HDR})
+#promoting these to API
+list(FILTER LIB_HDR EXCLUDE REGEX "/mhd_str.h")
+list(FILTER LIB_HDR EXCLUDE REGEX "/mhd_limits.h")
+
+file(GLOB API_HDR "${API_HDR_DIR}/*.h" ${API_CONFIG_HDR} ${LIB_SRC_DIR}/mhd_str.h ${LIB_SRC_DIR}/mhd_limits.h)
 
 include_directories(
  ${PROJECT_NAME}
