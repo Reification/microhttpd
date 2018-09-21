@@ -6,9 +6,20 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE STRING "" FORCE)
 
+set(INSTALL_TO_REIFY_OMNIBUS FALSE CACHE BOOL "Set install location for iterative testing with ReifyOminbus project")
+
+#if we want to iterate on this library in ReifyOmnibus install it to the unpacked 3rd party location for that project
+if(INSTALL_TO_REIFY_OMNIBUS AND (NOT "${CMAKE_INSTALL_PREFIX}" MATCHES "ReifyOmnibus"))
+	if(WIN32)
+		set(_PLAT "win64")
+	elseif(ANDROID)
+		set(_PLAT "android")
+	endif()
+  	set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/../ReifyOmnibus/build/${_PLAT}/ext" CACHE STRING "" FORCE)
+	unset(_PLAT)
 #if we have the default install prefix (which we will never use) set to a reasonable test location
-if("${CMAKE_INSTALL_PREFIX}" MATCHES "/Program Files")
-  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE STRING "" FORCE)
+elseif((NOT CMAKE_INSTALL_PREFIX) OR ("${CMAKE_INSTALL_PREFIX}" MATCHES "/Program Files"))
+	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE STRING "" FORCE)
 endif()
 
 set(BUILD_TESTS FALSE CACHE BOOL "Build simple manually run tests")
