@@ -4,8 +4,6 @@ project(microhttpd LANGUAGES C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE STRING "" FORCE)
-
 set(INSTALL_TO_REIFY_OMNIBUS FALSE CACHE BOOL "Set install location for iterative testing with ReifyOminbus project")
 
 #if we want to iterate on this library in ReifyOmnibus install it to the unpacked 3rd party location for that project
